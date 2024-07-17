@@ -5,13 +5,17 @@ const playerModelSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-      required: true,
+    multiplier: {
+      type: Number,
+      default: 0,
     },
-    password: {
-      type: String,
-      required: true,
+    points: {
+      type: Number,
+      default: 0,
+    },
+    gained: {
+      type: Number,
+      default: 0,
     },
   },
   {
