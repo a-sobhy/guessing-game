@@ -1,7 +1,8 @@
-import React from "react";
+import React from "react"
+import { JoinGame } from "./pages/JoinGame"
 
 const App = () => {
-  return <div>App</div>;
-};
+  return <JoinGame />
+}
 
-export default App;
+export default App
