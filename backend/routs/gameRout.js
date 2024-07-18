@@ -18,15 +18,39 @@ router.post("/register", async (req, res) => {
       return res.status(400).send({ message: "Username is already taken" });
     }
 
-    const newUser = new PlayerModel({ name, points: 1000 }); // Initialize with 1000 points
+    const newUser = new PlayerModel({ name, gained: 1000 }); // Initialize with 1000 points
     const createUser = await newUser.save();
+
+    return res.status(200).json({
+      message: "Player created successfully",
+      user: createUser,
+      state: "success",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+// Game initiator route
+router.post("/initiate-round", async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).send({ message: "Name is required" });
+    }
+
+    const existingUser = await PlayerModel.findById(userId);
+    if (!existingUser) {
+      return res.status(401).send({ message: "Username is not existing" });
+    }
 
     const generateRandomPlayer = () => {
       const randomName = `Player${Math.floor(Math.random() * 10000)}`;
       return {
         name: randomName,
-        points: Math.floor(Math.random() * 999) + 1, // Assign random points between 0 and 1000
-        multiplier: Math.floor(Math.random() * 999) + 1, // Assign random multiplier between 0 and 10
+        gained: 1000,
       };
     };
 
@@ -39,12 +63,12 @@ router.post("/register", async (req, res) => {
     const savedPlayers = await PlayerModel.insertMany(randomPlayers);
 
     const allPlayers = [
-      createUser._id,
+      existingUser._id,
       ...savedPlayers.map((player) => player._id),
     ];
 
     const newGameState = new GameBoardModel({
-      multiplier: 0, // Assign a random multiplier for the game board
+      multiplier: 0,
       isRunning: false,
       initialPoints: 0,
       players: allPlayers,
@@ -53,8 +77,8 @@ router.post("/register", async (req, res) => {
     await newGameState.save();
 
     return res.status(200).json({
-      message: "User and random players created successfully",
-      user: createUser,
+      message: "Random players created successfully",
+      userId: existingUser._id,
       randomPlayers: savedPlayers,
       game: newGameState,
     });

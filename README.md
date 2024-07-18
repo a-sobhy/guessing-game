@@ -1,6 +1,7 @@
 # To run this project you need to follow the following steps:
 1. [x] Go to the backend directory, open it in VSCode code editor, open the terminat - using "Ctrl + ~" or else - and type:
       - yarn add
+      then
       - yarn run dev     
 2. [x] you should have MongoDB Compass for database
       - open it and connect
