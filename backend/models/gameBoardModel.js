@@ -7,10 +7,6 @@ const GameBoardSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    isRunning: {
-      type: Boolean,
-      default: false,
-    },
     players: [
       {
         type: mongoose.Schema.Types.ObjectId,

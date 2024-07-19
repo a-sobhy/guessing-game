@@ -1,8 +1,9 @@
-import React from "react"
-import { JoinGame } from "./pages/JoinGame"
+import React from "react";
+import { JoinGame } from "./pages/GameBoard";
+import { Box } from "@mui/material";
 
 const App = () => {
-  return <JoinGame />
-}
+  return <JoinGame />;
+};
 
-export default App
+export default App;

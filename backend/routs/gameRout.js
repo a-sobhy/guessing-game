@@ -15,7 +15,12 @@ router.post("/register", async (req, res) => {
 
     const existingUser = await PlayerModel.findOne({ name });
     if (existingUser) {
-      return res.status(400).send({ message: "Username is already taken" });
+      const findExistingUser = await PlayerModel.findOne({ name });
+      return res.status(201).send({
+        message: "Username is existing",
+        user: findExistingUser,
+        state: "success",
+      });
     }
 
     const newUser = new PlayerModel({ name, gained: 1000 }); // Initialize with 1000 points
@@ -38,7 +43,7 @@ router.post("/initiate-round", async (req, res) => {
     const { userId } = req.body;
 
     if (!userId) {
-      return res.status(400).send({ message: "Name is required" });
+      return res.status(400).send({ message: "User ID is required" });
     }
 
     const existingUser = await PlayerModel.findById(userId);
@@ -92,7 +97,7 @@ router.post("/initiate-round", async (req, res) => {
 router.post("/start-round", async (req, res) => {
   try {
     const { userId, points, multiplier, gameId } = req.body;
-
+    
     const randomMultiplier = Math.floor(Math.random() * 999) + 1;
     const actualPlayer = await PlayerModel.findById(userId);
     const currentGame = await GameBoardModel.findById(gameId);
@@ -105,12 +110,49 @@ router.post("/start-round", async (req, res) => {
 
     actualPlayer.points = points;
     actualPlayer.multiplier = multiplier;
-    await actualPlayer.save();
     currentGame.multiplier = randomMultiplier;
 
+    const gameplayers = currentGame.players;
+    const filteredPlayers = gameplayers.filter(
+      (player) => !player.equals(actualPlayer._id)
+    );
+
+    async function updatePlayers(players) {
+      const playerPromises = players.map(async (p) => {
+        const player = await PlayerModel.findById(p);
+        if (player) {
+          const randomPlayersPoints = Math.floor(Math.random() * 999) + 1;
+          const randomPlayersMultiplier = Math.floor(Math.random() * 999) + 1;
+          player.points = randomPlayersPoints;
+          player.multiplier = randomPlayersMultiplier;
+          await player.save();
+        }
+      });
+
+      await Promise.all(playerPromises);
+      await actualPlayer.save();
+    }
+    updatePlayers(filteredPlayers)
+      .then(() => {
+        console.log("Players updated successfully.");
+      })
+      .catch((err) => {
+        console.error("Error updating players:", err);
+      });
+    const playersValues = await Promise.all(
+      gameplayers.map(async (p) => {
+        const player = await PlayerModel.findById(p);
+        return player;
+      })
+    );
     await currentGame.save();
 
-    res.status(201).json({ game: currentGame, player: actualPlayer });
+    res.status(201).json({
+      status: "success",
+      gameId: currentGame._id,
+      gameMultiplier: currentGame.multiplier,
+      players: playersValues,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ message: "Internal Server Error" });
@@ -122,28 +164,31 @@ router.post("/calculate-results", async (req, res) => {
   try {
     const { roundId } = req.body;
 
+
     const round = await GameBoardModel.findById(roundId).populate("players");
     if (!round) {
       return res.status(404).send({ message: "Round not found" });
     }
+    await Promise.all(
+      round.players.map(async (player) => {
+        if (player.multiplier <= round.multiplier) {
+          player.score = player.points * player.multiplier;
+          player.gained += player.score;
+        } else {
+          player.score = 0;
+          player.gained -= player.points;
+        }
+        await player.save();
+      })
+    );
 
-    for (const player of round.players) {
-      if (player.multiplier <= round.multiplier) {
-        player.gained += player.points * player.multiplier;
-      } else {
-        player.points = 0;
-      }
-      await player.save();
-    }
-
-    round.isRunning = false;
     await round.save();
-
     res.status(200).json(round);
   } catch (error) {
     console.error(error);
     return res.status(500).send({ message: "Internal Server Error" });
   }
 });
+
 
 export default router;
