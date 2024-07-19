@@ -1,13 +1,94 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "poppinsRegular";
+  src: url(../public/assets/font/Poppins-Regular.ttf); /* Adjust the path */
+}
+@font-face {
+  font-family: "poppinsMedium";
+  src: url(../public/assets/font/Poppins-Medium.ttf); /* Adjust the path */
+}
+@font-face {
+  font-family: "poppinsBold";
+  src: url(../public/assets/font/Poppins-Bold.ttf); /* Adjust the path */
+}
+@font-face {
+  font-family: "poppinsSemiBold";
+  src: url(../public/assets/font/Poppins-SemiBold.ttf); /* Adjust the path */
+}
+@font-face {
+  font-family: "poppinsBlack";
+  src: url(../public/assets/font/Poppins-Black.ttf); /* Adjust the path */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  padding: 6rem 12rem 1rem;
+  font-family: "poppinsMedium";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #15191f;
+  color: #fff;
+}
+.lightcontainer {
+  background: #202632;
+  box-shadow: 0 0 3px 0px #636467;
+  border-radius: 0.3pc;
+}
+.playerNameInput {
+  display: block;
+  width: 100%;
+  padding: 6px;
+  background: #15191f;
+  border: 0;
+  outline: none;
+  border-radius: 0.3pc;
+  box-shadow: 0 0 3px 0px #636467;
+}
+.submitButtonStyle {
+  width: 100%;
+  transition: all 0.4s ease-in-out;
+  padding: 7px;
+  border-radius: 0.3pc;
+}
+.submitButtonActiveStyle {
+  background: linear-gradient(45deg, #e4397e, #ff6500);
+}
+.submitButtonDisabledStyle {
+  background: #333;
+}
+.inputCard {
+  padding: 5px 10px;
+  background: linear-gradient(45deg, #15191f, #202632);
+  box-shadow: 0 0 3px 0px #636467;
+  border-radius: 0.3pc;
+}
+.operatorBtn {
+  box-shadow: 0 0 3px 0px #636467;
+  border-radius: 0.4pc;
+  transition: all 0.3s ease-in-out;
+}
+
+.operatorBtn:hover {
+  box-shadow: 0 0 3px 0px #ff6500;
+}
+::-webkit-scrollbar {
+  width: 2px;
+  background: transparent;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  background: #0099ff3a;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 12px;
 }
