@@ -32,14 +32,6 @@ const GameEntries = ({
   const [multiPlier, setMultiPlier] = useState(1.0);
 
   useEffect(() => {
-    console.log("roundPlayers with multipliers", roundPlayers);
-    const newUserData = roundPlayers?.find((p) => p._id === userId);
-    console.log("new user data", newUserData);
-    if (newUserData?.gained) {
-      setGainedPoints(newUserData?.gained);
-    }
-  }, [roundPlayers]);
-  useEffect(() => {
     if (roundPlayers) {
       const allPlayers = roundPlayers.map((player) =>
         player._id === userId
@@ -56,13 +48,16 @@ const GameEntries = ({
       dispatch(getResults({ roundId: gameId })).then((res) => {
         if (res && res?.payload?.players) {
           setRanks(res?.payload?.players);
+          const newUserData = res?.payload?.players.find((p) => p._id === userId);
+        if (newUserData?.gained) {
+          setGainedPoints(newUserData?.gained);
+        }
         }
       });
     }
   }, [done]);
 
   const handleSubmitValues = () => {
-    localStorage.setItem("roundResults", JSON.stringify([]));
     dispatch(startRound({ multiplier: multiPlier, points, userId, gameId }));
   };
   return (
