@@ -127,10 +127,12 @@ export const JoinGame = () => {
         </Box>
         <Box width="70%" display="flex" flexDirection="column" gap={2}>
           <Box display="flex" gap={2}>
-            <UserValuesCard
-              value={user ? gainedPoints : ""}
-              icon={<BadgeIcon />}
-            />
+            {gainedPoints && (
+              <UserValuesCard
+                value={user ? gainedPoints : ""}
+                icon={<BadgeIcon />}
+              />
+            )}
             <UserValuesCard
               value={user ? user.name : ""}
               icon={user ? <LogedinUserIcon /> : <UserIcon />}
