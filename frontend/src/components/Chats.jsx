@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Button, TextField } from "@mui/material";
+
 const generateColor = (name) => {
-  // Generate a hash from the player's name
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  // Convert hash to a color
   const color = `#${((hash & 0x00ffffff) >>> 0).toString(16).padStart(6, "0")}`;
   return color;
 };
+
 const generateRandomMessage = (players) => {
   const messages = [
     "Hello there!",
@@ -19,19 +19,19 @@ const generateRandomMessage = (players) => {
     "Have a great day!",
   ];
 
-  // Ensure players array is not empty
-  if (players.length === 0)
+  if (players?.length === 0) {
     return { text: "No players available.", color: "#FFFFFF" };
+  } else if (players && players?.length > 0) {
+    const player = players[Math.floor(Math.random() * players?.length)];
+    const color = generateColor(player.name);
 
-  const player = players[Math.floor(Math.random() * players.length)];
-  const color = generateColor(player.name);
-
-  return {
-    text: `${player.name}: ${
-      messages[Math.floor(Math.random() * messages.length)]
-    }`,
-    color,
-  };
+    return {
+      text: `${player.name}: ${
+        messages[Math.floor(Math.random() * messages.length)]
+      }`,
+      color,
+    };
+  }
 };
 
 export const Chats = ({ players }) => {
@@ -50,20 +50,21 @@ export const Chats = ({ players }) => {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const { text, color } = generateRandomMessage(players);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text, type: "random", color },
-      ]);
-    }, 5000); // Adjust the interval as needed
+    if (players && players?.length > 0) {
+      const interval = setInterval(() => {
+        const { text, color } = generateRandomMessage(players);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { text, type: "random", color },
+        ]);
+      }, 5000);
 
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    }
   }, [players]);
 
-  // Scroll to the bottom of the chat when new messages are added
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
   return (
@@ -75,8 +76,9 @@ export const Chats = ({ players }) => {
       display="flex"
       flexDirection="column"
       justifyContent="space-between"
+      maxHeight="13.5pc"
     >
-      <Box overflow="auto" maxHeight="12pc" className="chatBox">
+      <Box height="100%" className="chatBox overflow-y-auto">
         {messages.map((message, index) => (
           <Box
             key={index}

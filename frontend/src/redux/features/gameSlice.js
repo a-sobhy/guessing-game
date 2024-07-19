@@ -6,9 +6,7 @@ export const startRound = createAsyncThunk(
   async (params, thunkAPI) => {
     try {
       const { data } = await API.post(`/start-round`, params);
-      if (data) {
-        localStorage.setItem("roundInfo", JSON.stringify(data));
-      }
+      console.log("Start Round", data);
       return data;
     } catch (error) {
       handleError(error);
@@ -22,9 +20,7 @@ export const getResults = createAsyncThunk(
   async (params, thunkAPI) => {
     try {
       const { data } = await API.post(`/calculate-results`, params);
-      if (data) {
-        localStorage.setItem("roundResults", JSON.stringify(data));
-      }
+
       return data;
     } catch (error) {
       handleError(error);
@@ -35,6 +31,8 @@ export const getResults = createAsyncThunk(
 
 const initialState = {
   multiplier: null,
+  roundPlayers: null,
+  game: null,
   status: null,
   loading: false,
   error: null,
@@ -53,14 +51,39 @@ export const gameSlice = createSlice({
       state.loading = false;
       state.status = action.payload.status;
       state.multiplier = action.payload.gameMultiplier;
+      state.roundPlayers = action.payload.players;
+      state.game = action.payload.game;
       state.error = null;
     });
     builder.addCase(startRound.rejected, (state, action) => {
       state.loading = false;
       state.status = null;
+      state.roundPlayers = null;
+      state.game = null;
       state.multiplier = null;
       state.error = action.payload;
     });
+    
+    //! Get Results
+    builder.addCase(getResults.pending, (state) => {
+      state.loading = true;
+    });
+    // builder.addCase(getResults.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.status = action.payload.status;
+    //   state.multiplier = action.payload.gameMultiplier;
+    //   state.roundPlayers = action.payload.players;
+    //   state.game = action.payload.game;
+    //   state.error = null;
+    // });
+    // builder.addCase(getResults.rejected, (state, action) => {
+    //   state.loading = false;
+    //   state.status = null;
+    //   state.roundPlayers = null;
+    //   state.game = null;
+    //   state.multiplier = null;
+    //   state.error = action.payload;
+    // });
   },
 });
 

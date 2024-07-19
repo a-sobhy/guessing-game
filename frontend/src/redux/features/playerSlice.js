@@ -6,9 +6,7 @@ export const joinGame = createAsyncThunk(
   async (params, thunkAPI) => {
     try {
       const { data } = await API.post(`/register`, params);
-      if (data?.user) {
-        localStorage.setItem("userInfo", JSON.stringify(data.user));
-      }
+
       return data;
     } catch (error) {
       handleError(error);
@@ -23,9 +21,6 @@ export const initiateRound = createAsyncThunk(
     try {
       const { data } = await API.post(`/initiate-round`, params);
 
-      if (data) {
-        localStorage.setItem("gameInfo", JSON.stringify(data));
-      }
       return data;
     } catch (error) {
       handleError(error);
@@ -35,7 +30,9 @@ export const initiateRound = createAsyncThunk(
 );
 
 const initialState = {
-  gameStart: null,
+  initialGame: null,
+  user: null,
+  loginTime: null,
   randomPlayers: null,
   status: null,
   loading: false,
@@ -54,12 +51,16 @@ export const playerSlice = createSlice({
     builder.addCase(joinGame.fulfilled, (state, action) => {
       state.loading = false;
       state.status = action.payload.state;
-      state.gameStart = null;
+      state.loginTime = action.payload.logedinAt;
+      state.user = action.payload.user;
+      state.initialGame = null;
       state.error = null;
     });
     builder.addCase(joinGame.rejected, (state, action) => {
       state.loading = false;
-      state.gameStart = null;
+      state.initialGame = null;
+      state.user = null;
+      state.loginTime = null;
       state.status = null;
       state.error = action.payload;
     });
@@ -70,12 +71,14 @@ export const playerSlice = createSlice({
     });
     builder.addCase(initiateRound.fulfilled, (state, action) => {
       state.loading = false;
-      state.gameStart = action.payload;
+      state.initialGame = action.payload.game;
+      state.randomPlayers = action.payload.randomPlayers;
       state.error = null;
     });
     builder.addCase(initiateRound.rejected, (state, action) => {
       state.loading = false;
-      state.gameStart = null;
+      state.initialGame = null;
+      state.randomPlayers = null;
       state.error = action.payload;
     });
   },

@@ -69,6 +69,9 @@ body {
   background: linear-gradient(45deg, #15191f, #202632);
   box-shadow: 0 0 3px 0px #636467;
   border-radius: 0.3pc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .operatorBtn {
   box-shadow: 0 0 3px 0px #636467;
