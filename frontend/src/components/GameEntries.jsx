@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Slider, TextField } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import ThemedButton from "./ThemedButton";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getResults, startRound } from "../redux/features/gameSlice";
 import CounterValueInput from "./CounterValueInput";
 import SpeedSlider from "./SpeedSlider";
@@ -20,33 +20,32 @@ const GameEntries = ({
   points,
   setPoints,
   setRanks,
+  setGainedPoints,
 }) => {
   const dispatch = useDispatch();
-  const previousRoundInfoRef = useRef(null);
-  const roundInfo = JSON.parse(localStorage.getItem("roundInfo"));
 
+  // const roundInfo = useSelector((state) => state.player.gameStart);
+  const { game } = useSelector((state) => state.game);
+  const { roundPlayers } = useSelector((state) => state.game);
+
+  const [CurrentPlayers, setCurrentPlayers] = useState([]);
   const [multiPlier, setMultiPlier] = useState(1.0);
+
   useEffect(() => {
-    if (
-      roundInfo &&
-      roundInfo.players &&
-      JSON.stringify(roundInfo.players) !==
-        JSON.stringify(previousRoundInfoRef.current?.players)
-    ) {
-      const allPlayers = roundInfo.players.map((player) =>
+    console.log("roundPlayers with multipliers", roundPlayers);
+  }, [roundPlayers]);
+  useEffect(() => {
+    if (roundPlayers) {
+      const allPlayers = roundPlayers.map((player) =>
         player._id === userId
           ? { ...player, name: "You", multiplier: multiPlier }
           : player
       );
-
+      console.log("39 -- allPlayers from entries", allPlayers);
+      setCurrentPlayers(allPlayers);
       setPlayers(allPlayers);
-
-      const updatedRoundInfo = { ...roundInfo, players: allPlayers };
-      localStorage.setItem("roundInfo", JSON.stringify(updatedRoundInfo));
-
-      previousRoundInfoRef.current = updatedRoundInfo;
     }
-  }, [roundInfo]);
+  }, [multiPlier, roundPlayers, userId]);
   useEffect(() => {
     if (done && gameId) {
       dispatch(getResults({ roundId: gameId })).then((res) => {
@@ -56,6 +55,7 @@ const GameEntries = ({
       });
     }
   }, [done]);
+
   const handleSubmitValues = () => {
     localStorage.setItem("roundResults", JSON.stringify([]));
     dispatch(startRound({ multiplier: multiPlier, points, userId, gameId }));

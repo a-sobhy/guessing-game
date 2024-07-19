@@ -9,6 +9,8 @@ import { UserValuesCard } from "../components/UserValuesCard";
 import { ReactComponent as UserIcon } from "../components/Icons/person-1.svg";
 import { ReactComponent as LogedinUserIcon } from "../components/Icons/person-2.svg";
 import { ReactComponent as BadgeIcon } from "../components/Icons/badge-medal.svg";
+import { ReactComponent as ClockIcon } from "../components/Icons/clock.svg";
+import { ReactComponent as ChatIcon } from "../components/Icons/chat.svg";
 import SectionTitle from "../components/SectionTitle";
 import RankingTable from "../components/RankingTable";
 import { Chats } from "../components/Chats";
@@ -38,36 +40,43 @@ const initialRanking = [
 export const JoinGame = () => {
   const dispatch = useDispatch();
 
-  const user = JSON.parse(localStorage.getItem("userInfo"));
-  const loginTime = localStorage.getItem("logedinAt");
+  const { user } = useSelector((state) => state.player);
+  const { status } = useSelector((state) => state.player);
+  const { initialGame } = useSelector((state) => state.player);
+  const { randomPlayers } = useSelector((state) => state.player);
+  const { multiplier } = useSelector((state) => state.game);
+  const loginTime = useSelector((state) => state.player.loginTime);
+
   const logintimeDate = new Date(parseInt(loginTime, 10));
-  const formattedTime = logintimeDate.toLocaleTimeString("en-US", {
+  const formattedTime = logintimeDate?.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
   });
 
-  const game = JSON.parse(localStorage.getItem("gameInfo"));
-  const results = JSON.parse(localStorage.getItem("roundResults"));
-
-  const { status } = useSelector((state) => state.player);
-  const { multiplier } = useSelector((state) => state.game);
   const [speed, setSpeed] = useState(1);
   const [multiplierValue, setMultiplierValue] = useState(0);
   const [players, setPlayers] = useState([]);
   const [gameId, setGameId] = useState("");
   const [done, setDone] = useState(false);
   const [points, setPoints] = useState(50);
+  const [gainedPoints, setGainedPoints] = useState(null);
   const [ranks, setRanks] = useState([]);
-  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    if (game && !(players?.length > 0)) {
+    if (user && status && status === "success") {
+      setGainedPoints(user?.gained);
+      dispatch(initiateRound({ userId: user._id }));
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (randomPlayers) {
       const modifiedUser = { ...user, name: "You", points: 0 };
-      const allPlayers = [modifiedUser, ...game.randomPlayers];
+      const allPlayers = [modifiedUser, ...randomPlayers];
       setPlayers(allPlayers);
     }
-  }, [game, players]);
+  }, [randomPlayers, user]);
 
   useEffect(() => {
     if (multiplier) {
@@ -76,15 +85,10 @@ export const JoinGame = () => {
   }, [multiplier]);
 
   useEffect(() => {
-    if (game && !Boolean(gameId)) {
-      setGameId(game.game._id);
+    if (initialGame) {
+      setGameId(initialGame._id);
     }
-  }, [game, gameId]);
-  useEffect(() => {
-    if (Boolean(status) && status === "success") {
-      dispatch(initiateRound({ userId: user._id }));
-    }
-  }, [status]);
+  }, [initialGame, gameId]);
 
   useEffect(() => {
     console.log("game board ranks", ranks);
@@ -93,8 +97,8 @@ export const JoinGame = () => {
   return (
     <>
       <Box display="flex" gap={2}>
-        <Box width="25%">
-          {user && game ? (
+        <Box width="30%">
+          {user && gameId ? (
             <>
               <GameEntries
                 userId={user._id}
@@ -106,6 +110,7 @@ export const JoinGame = () => {
                 points={points}
                 setPoints={setPoints}
                 setRanks={setRanks}
+                setGainedPoints={setGainedPoints}
               />
             </>
           ) : (
@@ -120,10 +125,10 @@ export const JoinGame = () => {
             </Box>
           )}
         </Box>
-        <Box width="75%" display="flex" flexDirection="column" gap={2}>
+        <Box width="70%" display="flex" flexDirection="column" gap={2}>
           <Box display="flex" gap={2}>
             <UserValuesCard
-              value={user ? user.gained - points : ""}
+              value={user ? gainedPoints : ""}
               icon={<BadgeIcon />}
             />
             <UserValuesCard
@@ -131,8 +136,8 @@ export const JoinGame = () => {
               icon={user ? <LogedinUserIcon /> : <UserIcon />}
             />
             <UserValuesCard
-              value={user ? formattedTime : ""}
-              icon={user ? <LogedinUserIcon /> : <UserIcon />}
+              value={loginTime ? formattedTime : ""}
+              icon={<ClockIcon />}
             />
           </Box>
           <Box className="lightcontainer">
@@ -149,11 +154,11 @@ export const JoinGame = () => {
       <Box display="flex" gap={2} marginY={2}>
         <Box width="50%">
           <SectionTitle title="Ranking" icon={<BadgeIcon />} />
-          <RankingTable ranks={ranks} username={user.name} />
+          <RankingTable ranks={ranks} username={user?.name} />
         </Box>
         <Box width="50%">
-          <SectionTitle title="Chats" icon={<BadgeIcon />} />
-          <Chats players={game.randomPlayers} />
+          <SectionTitle title="Chats" icon={<ChatIcon />} />
+          <Chats players={players} />
         </Box>
       </Box>
       <br />

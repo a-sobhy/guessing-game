@@ -17,12 +17,7 @@ export const JoinForm = () => {
     }
   }, [name]);
   const handleSubmitJoinGame = () => {
-    dispatch(joinGame({ name })).then((res) => {
-      if (res && res?.payload?.state === "success") {
-        const logintime = Date.now();
-        localStorage.setItem("logedinAt", logintime);
-      }
-    });
+    dispatch(joinGame({ name }));
   };
 
   return (

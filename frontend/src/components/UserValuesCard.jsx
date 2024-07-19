@@ -9,7 +9,7 @@ export const UserValuesCard = ({ value, icon }) => {
       height={!value ? 45 : "unset"}
       width="100%"
     >
-      <Box position="absolute" width={35} top={0} bottom={0}>
+      <Box position="absolute" width={25} top={0} left="13px" bottom={0}>
         {icon}
       </Box>
       <h3 className="text-center">{value}</h3>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   styled,
   Table,
@@ -9,28 +9,15 @@ import {
   TableRow,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
+
 const initialRanking = [
-  {
-    name: "-",
-    score: "-",
-  },
-  {
-    name: "-",
-    score: "-",
-  },
-  {
-    name: "-",
-    score: "-",
-  },
-  {
-    name: "-",
-    score: "-",
-  },
-  {
-    name: "-",
-    score: "-",
-  },
+  { name: "-", score: "-" },
+  { name: "-", score: "-" },
+  { name: "-", score: "-" },
+  { name: "-", score: "-" },
+  { name: "-", score: "-" },
 ];
+
 const heads = ["No.", "Name", "Score"];
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -40,29 +27,29 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(even)": {
     backgroundColor: "#191f27",
   },
-  // hide last border
   "&:last-child td, &:last-child th": {
     border: 0,
   },
 }));
 
 const RankingTable = ({ ranks, username }) => {
-  const [arrangedRanks, setArrangedRanks] = useState([]);
+  const [arrangedRanks, setArrangedRanks] = useState(initialRanking);
 
   useEffect(() => {
-    if (ranks) {
+    if (ranks && ranks.length > 0) {
       const sortedRanks = [...ranks].sort((a, b) => b.score - a.score);
       const allPlayers = sortedRanks.map((player) =>
         player.name === username ? { ...player, name: "You" } : player
       );
       setArrangedRanks(allPlayers);
-    }else{
-      setArrangedRanks(initialRanking)
+    } else {
+      setArrangedRanks(initialRanking);
     }
+    
   }, [ranks, username]);
-  
+
   useEffect(() => {
-    console.log("arrangedRanks",arrangedRanks)
+    console.log("arrangedRanks", arrangedRanks);
   }, [arrangedRanks]);
 
   return (
@@ -79,7 +66,6 @@ const RankingTable = ({ ranks, username }) => {
       <Table
         sx={{
           color: "#fff",
-
           "& .MuiTableCell-root": {
             border: 0,
             padding: 1,
@@ -99,17 +85,15 @@ const RankingTable = ({ ranks, username }) => {
             ))}
           </TableRow>
         </TableHead>
-        {Boolean(ranks) && (
-          <TableBody>
-            {arrangedRanks?.map((row, i) => (
-              <StyledTableRow key={row.name}>
-                <TableCell>{i + 1}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.score >= 0 ? row.score : "-"}</TableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        )}
+        <TableBody>
+          {arrangedRanks.slice(0, 5).map((row, i) => (
+            <StyledTableRow key={i}>
+              <TableCell>{i + 1}</TableCell>
+              <TableCell>{row.name}</TableCell>
+              <TableCell>{row.score}</TableCell>
+            </StyledTableRow>
+          ))}
+        </TableBody>
       </Table>
     </TableContainer>
   );

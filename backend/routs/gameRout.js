@@ -16,19 +16,24 @@ router.post("/register", async (req, res) => {
     const existingUser = await PlayerModel.findOne({ name });
     if (existingUser) {
       const findExistingUser = await PlayerModel.findOne({ name });
+      findExistingUser.multiplier = 0;
+      await findExistingUser.save();
+
       return res.status(201).send({
         message: "Username is existing",
         user: findExistingUser,
+        logedinAt: new Date(),
         state: "success",
       });
     }
 
-    const newUser = new PlayerModel({ name, gained: 1000 }); // Initialize with 1000 points
+    const newUser = new PlayerModel({ name, gained: 1000, multiplier: 0 }); // Initialize with 1000 points
     const createUser = await newUser.save();
 
     return res.status(200).json({
       message: "Player created successfully",
       user: createUser,
+      logedinAt: new Date(),
       state: "success",
     });
   } catch (error) {
@@ -50,7 +55,6 @@ router.post("/initiate-round", async (req, res) => {
     if (!existingUser) {
       return res.status(401).send({ message: "Username is not existing" });
     }
-
     const generateRandomPlayer = () => {
       const randomName = `Player${Math.floor(Math.random() * 10000)}`;
       return {
@@ -97,7 +101,7 @@ router.post("/initiate-round", async (req, res) => {
 router.post("/start-round", async (req, res) => {
   try {
     const { userId, points, multiplier, gameId } = req.body;
-    
+
     const randomMultiplier = Math.floor(Math.random() * 999) + 1;
     const actualPlayer = await PlayerModel.findById(userId);
     const currentGame = await GameBoardModel.findById(gameId);
@@ -132,13 +136,9 @@ router.post("/start-round", async (req, res) => {
       await Promise.all(playerPromises);
       await actualPlayer.save();
     }
-    updatePlayers(filteredPlayers)
-      .then(() => {
-        console.log("Players updated successfully.");
-      })
-      .catch((err) => {
-        console.error("Error updating players:", err);
-      });
+
+    await updatePlayers(filteredPlayers);
+
     const playersValues = await Promise.all(
       gameplayers.map(async (p) => {
         const player = await PlayerModel.findById(p);
@@ -159,11 +159,11 @@ router.post("/start-round", async (req, res) => {
   }
 });
 
+
 // Result
 router.post("/calculate-results", async (req, res) => {
   try {
     const { roundId } = req.body;
-
 
     const round = await GameBoardModel.findById(roundId).populate("players");
     if (!round) {
@@ -189,6 +189,5 @@ router.post("/calculate-results", async (req, res) => {
     return res.status(500).send({ message: "Internal Server Error" });
   }
 });
-
 
 export default router;
