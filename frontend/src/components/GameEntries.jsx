@@ -33,6 +33,11 @@ const GameEntries = ({
 
   useEffect(() => {
     console.log("roundPlayers with multipliers", roundPlayers);
+    const newUserData = roundPlayers?.find((p) => p._id === userId);
+    console.log("new user data", newUserData);
+    if (newUserData?.gained) {
+      setGainedPoints(newUserData?.gained);
+    }
   }, [roundPlayers]);
   useEffect(() => {
     if (roundPlayers) {
